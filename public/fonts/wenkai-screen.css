@@ -1,0 +1,12 @@
+@font-face {
+  font-family: "LXGW WenKai Screen";
+  src: url("./LXGWWenKaiScreen.ttf") format("truetype");
+  font-style: normal;
+  font-weight: 400;
+  font-display: swap;
+}
+
+/* Apply to slide text by inheritance; code and KaTeX retain their own fonts. */
+.slidev-layout {
+  font-family: "LXGW WenKai Screen", "Microsoft YaHei", sans-serif;
+}
