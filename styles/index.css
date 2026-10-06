@@ -1,0 +1,25 @@
+/* Slidev imports this entry in both development and production. */
+@font-face {
+  font-family: "LXGW WenKai Screen";
+  src: url("/fonts/LXGWWenKaiScreen-web.woff2") format("woff2");
+  font-style: normal;
+  font-weight: 400;
+  font-display: swap;
+}
+
+/* Fetch the original font only if an uncommon character needs it. */
+@font-face {
+  font-family: "LXGW WenKai Screen Full";
+  src: url("/fonts/LXGWWenKaiScreen.ttf") format("truetype");
+  font-style: normal;
+  font-weight: 400;
+  font-display: swap;
+}
+
+.slidev-layout {
+  font-family: "LXGW WenKai Screen", "LXGW WenKai Screen Full", "Microsoft YaHei", sans-serif;
+}
+
+.slidev-layout :is(h1, h2, h3, h4, h5, h6) {
+  font-family: inherit;
+}

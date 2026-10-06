@@ -4,8 +4,8 @@ separator: <!-- s -->
 verticalSeparator: <!-- v -->
 theme: default
 fonts:
-  sans: LXGW WenKai Screen
-  local: LXGW WenKai Screen
+  sans: LXGW WenKai Screen, LXGW WenKai Screen Full
+  local: LXGW WenKai Screen, LXGW WenKai Screen Full
 highlightTheme: monokai-sublime
 css: unocss
 revealOptions:
@@ -49,11 +49,6 @@ revealOptions:
 <div class="fragment" style="margin-top: 40px">
 
 - 非对称加密与数字签名:RSA、ECC、DSA
-
-</div>
-<div class="fragment" style="margin-top: 40px">
-
-- 实战:CTF例题
 
 </div>
 
@@ -1134,13 +1129,6 @@ $$
 DSA就是ElGamal签名算法的一个常用变种
 
 </div>
-
----
-
-## CTF例题实战
-本节课准备了两道题目和大家一起分析
-- ezAES
-- ezRSA
 
 ---
 
