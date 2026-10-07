@@ -1174,7 +1174,7 @@ sage
 </div>
 <div class="fragment" style="margin-top: 40px">
 
-可以使用 **jupyter笔记本** 来进行wsl内脚本的编写
+可以用vscode连接wsl搭配 **jupyter笔记本** 来编写脚本并直接用sage运行
 
 这部分由blue学姐进行演示
 
