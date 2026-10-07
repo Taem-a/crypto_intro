@@ -1132,6 +1132,56 @@ DSA就是ElGamal签名算法的一个常用变种
 
 ---
 
+## Sagemath 安装和使用
+
+<div class="fragment" style="margin-top: 40px">
+
+### 推荐方式：使用 Conda 安装
+
+</div>
+<div class="fragment" style="margin-top: 40px">
+
+1. 安装 Miniforge（Conda 的最小发行版）
+```bash
+curl -L -O "https://github.com/conda-forge/miniforge/releases/latest/download/Miniforge3-$(uname)-$(uname -m).sh"
+bash Miniforge3-$(uname)-$(uname -m).sh
+```
+
+</div>
+<div class="fragment" style="margin-top: 40px">
+
+2. 创建 SageMath 环境
+
+```bash
+conda create -n sage sage python=3.11
+```
+这会创建一个名为 sage 的独立环境，避免与系统 Python 冲突
+
+</div>
+
+---
+
+<div class="fragment" style="margin-top: 40px">
+
+3. 激活环境并启动
+
+```bash
+conda activate sage
+sage
+```
+之后每次使用 SageMath，都需要先执行 conda activate sage
+
+</div>
+<div class="fragment" style="margin-top: 40px">
+
+可以使用 **jupyter笔记本** 来进行wsl内脚本的编写
+
+这部分由blue学姐进行演示
+
+</div>
+
+---
+
 <br>
 <br>
 <br>
