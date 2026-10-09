@@ -1182,6 +1182,82 @@ sage
 
 ---
 
+## VSCode + WSL + Sage
+
+### 一次性配置：连接 WSL
+
+<div class="fragment" style="margin-top: 24px; font-size: 20px; line-height: 1.65">
+
+**前提**：已安装 WSL Ubuntu，并在 Ubuntu 内通过 Miniforge 配置好 `sage` 环境。
+
+示例环境：SageMath 10.9，位于 `~/miniforge3/envs/sage/`。
+
+</div>
+
+<div class="fragment" style="margin-top: 24px; font-size: 22px; line-height: 1.65">
+
+1. 在 VSCode 的扩展商店搜索并安装 **WSL** 扩展。
+2. 按 `Ctrl+Shift+P`，输入 `WSL: Connect to WSL` 并回车。
+3. 确认左下角状态栏显示 **`WSL: Ubuntu`**。
+
+</div>
+
+---
+
+## VSCode + WSL + Sage
+
+### 一次性配置：扩展与文件夹信任
+
+<div class="fragment" style="margin-top: 20px; font-size: 20px; line-height: 1.5">
+
+在 **WSL 侧**安装 Python 和 Jupyter 扩展。下方命令在 Windows 终端中运行：
+
+```bash
+wsl -d Ubuntu -- bash -c '
+  for f in ~/.vscode-server/bin/*/bin/code-server; do
+    "$f" --install-extension ms-python.python \
+      --install-extension ms-toolsai.jupyter
+  done
+'
+```
+
+</div>
+
+<div class="fragment" style="margin-top: 24px; font-size: 20px; line-height: 1.65">
+
+**打开并信任工作文件夹**
+
+- 若左下角出现 `Restricted Mode`（受限模式），扩展会被禁用，内核列表可能为空。
+- 点击 `Restricted Mode` 徽章，在对话框中选择 **Trust**，信任该文件夹。
+
+</div>
+
+---
+
+## VSCode + WSL + Sage
+
+### 日常使用：选择内核并运行
+
+<div class="fragment" style="margin-top: 24px; font-size: 22px; line-height: 1.65">
+
+1. 按 `Ctrl+Shift+P`，执行 `WSL: Connect to WSL`。
+2. 通过 `File → Open Folder` 打开项目文件夹，再打开笔记本。
+3. 点击笔记本右上角 **Select Kernel**，选择 **Jupyter Kernel → SageMath**。
+4. 点击单元格旁的三角按钮，运行代码。
+
+</div>
+
+<div class="fragment" style="margin-top: 26px; font-size: 20px; line-height: 1.65">
+
+**选好内核后，运行无反应？**
+
+按 `Ctrl+Shift+P`，执行 `Developer: Reload Window`，刷新窗口后再运行。
+
+</div>
+
+
+---
+
 <br>
 <br>
 <br>
