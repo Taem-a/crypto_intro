@@ -402,13 +402,13 @@ $$
 </div>
 
 
-<div class="fragment" style="margin-top: 30px">
+<div v-click="1" class="fragment" style="margin-top: 30px">
 
 那如果是 53287120480317238287760026372435500810191949833067370376254933228102104403467 呢
 
 </div>
 
-<div class="fragment" style="margin-top: 30px">
+<div v-click="2" class="fragment" style="margin-top: 30px">
 
 结果是
 ```python
