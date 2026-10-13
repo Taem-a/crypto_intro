@@ -186,7 +186,7 @@ function demonstrate() {
                 v-for="(letter, slot) in alphabet"
                 :key="slot"
                 class="drum-letter"
-                :class="{ selected: slot === frontIndex(index) }"
+                :class="{ selected: !isBlank(index) && slot === frontIndex(index) }"
                 :style="{ transform: `rotateX(${-slot * angle}deg) translateZ(110px)` }"
               >{{ letter }}</span>
             </div>

@@ -33,7 +33,7 @@ revealOptions:
 ## 本堂课的内容
 <div class="fragment" style="margin-top: 40px">
 
-- 导论与古典密码:替换密码和一点(?历史背景
+- 导论与古典密码:背景和一点替换密码
 
 </div>
 <div class="fragment" style="margin-top: 40px">
@@ -43,12 +43,12 @@ revealOptions:
 </div>
 <div class="fragment" style="margin-top: 40px">
 
-- 对称加密:流密码、块密码
+- 非对称加密:RSA
 
 </div>
 <div class="fragment" style="margin-top: 40px">
 
-- 非对称加密:RSA
+- 对称加密:流密码、块密码
 
 </div>
 <div class="fragment" style="margin-top: 40px">
@@ -160,7 +160,6 @@ revealOptions:
 
 
 ---
-
 
 ## 现代密码学数学基础
 
@@ -360,278 +359,11 @@ $$
 
 ---
 
-## 对称加密
-
-<div class="fragment" style="margin-top: 20px">
-
-#### 流密码
-
-</div>
-
-<div class="fragment" style="margin-top: 20px">
-
-核心思想: 利用密钥$k$生成一个伪随机的数据流
-$$
-x_nx_{n-1}x_{n-2}\cdots x_2x_{1}x_{0}
-$$
-利用这个数据流来和我们的明文进行处理(譬如异或等)
-</div>
-
-
-
-<div class="fragment" style="margin-top: 40px">
-
-我们保证保密性的核心就是密钥流的随机性
-
-以异或处理为例子，假设我们的密文是
-$$
-c_nc_{n-1}c_{n-2}\cdots c_2c_{1}c_{0}
-$$
-
-</div>
-
-
-<div class="fragment" style="margin-top: 30px">
-
-对于任何明文流$m$，我们都能找到一个符合条件的密钥流，即
-$$
-x_i=c_i\oplus m_i
-$$
-</div>
-
----
-
-## 对称加密
-
-<div class="fragment" style="margin-top: 30px">
-
-综上，流密码可以分成以下流程
-- 密钥派生: 使用伪随机生成器(PRG)由密钥生成长密钥流
-- 流式处理: 将密钥流和明文流进行处理(譬如异或)
-</div>
-
-<div class="fragment" style="margin-top: 30px">
-
-PRG具备如下特征
-- 长周期
-- 高线性复杂度, 不易被数学推导来预测(LCG)
-- 统计性能良好, 不易被统计预测信息
-- 足够的“混乱”、“扩散” , 是其"随机性"的体现
-</div>
-<div class="fragment" style="margin-top: 30px">
-
-流密码具备如下特征
-- 明文长度无明确要求
-- 加密解密的操作是对称的，关键在于恢复密钥流
-</div>
-
----
-
-## 对称加密
-<div class="fragment" style="margin-top: 30px">
-
-#### 常见的PRG及其漏洞
-<ul style="line-height: 2.2; margin-top: 24px">
-<li style="margin-bottom: 14px">伪随机数生成器(PRNG)</li>
-<li style="margin-bottom: 14px">线性同余生成器(LCG)</li>
-<li>反馈移位寄存器(FSR)</li>
-</ul>
-</div>
-
-
-
----
-
-## 对称加密
-<div class="fragment" style="margin-top: 30px">
-
-#### 伪随机数生成器(PRNG)
-- 本节课的PRNG特指使用不安全的`random`库函数引入的随机数
-	- 这类random随机数的原理是梅森旋转([MT19937](https://github.com/guoql666/pyrandcracker))
-	- 连续获取 624 * 32 = 19,968  字节的连续随机生成数据即可恢复随机数生成器状态
-```python
-import random
-from randcrack import RandCrack
- 
-rc = RandCrack()
- 
-for i in range(624):
-    rc.submit(random.getrandbits(64))#修改为提交了624个64位数
- 
-print(random.getrandbits(64))#利用random库获取一个64位的随机数
-print(rc.predict_getrandbits(64))#利用randcrack获取的随机数
-```
-</div>
-
----
-
-## 对称加密
-<div class="fragment" style="margin-top: 30px">
-
-#### 线性同余生成器(LCG)
-- 递推生成式大致如下
-$$
-X_{n+1}\equiv aX_{n} + c \mod n
-$$
-- 其具备很强的线性相关性，故容易被数学推导来破解，往往只需要几组连续的输出$X_i$即可
-
-</div>
-
----
-
-
-## 对称加密
-
-#### 反馈移位寄存器(FSR)
-
-<FsrDemo />
-
-- 新生成的信息与当前的状态相关
-- 每次输出最右位，其余位右移，反馈位进入最左端
-
----
-
-## 对称加密
-<div class="fragment" style="margin-top: 30px">
-
-#### 线反馈移位寄存器(LFSR)
-
-- $F$是线性函数，即
-$$
-a_n=\sum^{n-1}_{i=0}c_ia_i
-$$
-- 可以考虑使用Berlekamp-Massey算法来破解LFSR，需要连续$2n$组输出，即
-$$
-\begin{cases}
-a_{n}=\sum^{n-1}_{i=0}c_ia_i\\ a_{n+1}=\sum^{n-1}_{i=0}c_ia_{i+1}\\ \vdots \\ a_{2n-1}=\sum^{n-1}_{i=0}c_ia_{i+n-1}
-\end{cases}
-$$
-即可构造出一个满秩方程组求解$c_i$
-</div>
-
----
-
-## 对称加密
-<div class="fragment" style="margin-top: 30px">
-
-#### 块密码
-
-</div>
-
-<div class="fragment" style="margin-top: 30px">
-
-核心思想: 对明文进行分块加密，不同块之间存在一定相关性
-
-同样的 密钥需要拓展到同等长度的块
-
-保密性在于密钥拓展到块的混淆以及块之间处理关系的复杂性
-
-具体体现在算法的**混淆**、**扩散**思想
-</div>
-
----
-
-## 对称加密
-
-<div class="fragment" style="margin-top: 30px">
-
-类似前文，我们可以总结块密码的流程
-
--  密钥派生
--  信息分块
--  块网络处理
-
-</div>
-<div class="fragment" style="margin-top: 30px">
-
-
-
-Crypto方向的CTF赛题中常见的块密码是AES,DES
-
-考点集中在对于AES不同加密方式 CBC EBC等的加密方式的理解与利用
-
-</div>
-
----
-
-## 对称加密
-<div class="fragment" style="margin-top: 30px">
-<img src="/crypto/ecb.svg" alt="ECB 模式：各明文块独立加密" class="crypto-diagram diagram-ecb" style="display: block; width: auto; max-width: 100%; height: 230px; object-fit: contain; background: white; padding: 12px; box-sizing: border-box; margin: 16px 0">
-
-<!-- 图片来源：https://commons.wikimedia.org/wiki/File:ECB_encryption.svg -->
-
-- ECB模式 
-
-对明文分块，和密钥派生的密钥块按个进行异或，块与块之间独立
-</div>
-
----
-
-## 对称加密
-#### AES · CBC 模式
-
-<CbcDemo />
-
-<p style="font-size: 15px; margin-top: 10px">C₁ = AES<sub>K</sub>(P₁ ⊕ IV)，C₂ = AES<sub>K</sub>(P₂ ⊕ C₁)。每组明文为 16 字节，第二组使用上一组密文参与异或。</p>
-
-
----
-
-## 对称加密
-<div class="fragment" style="margin-top: 30px">
-
-AES代码示例
-```python
-from Crypto.Cipher import AES
-from random import Random
-key = b"KeyMustBe16Bytes"
-# 创建AES加密器实例，密钥为key，ECB模式无需初始向量
-cipher1 = AES.new(key, AES_MODE_ECB) 
-# 创建AES加密器实例，密钥为key，CBC模式需要初始向量iv
-iv = b"ivShouldBe16Byte"
-cipher2 = AES.new(key, AES_MODE_CBC, iv) 
-msg = b"This_is_a_message"
-# 分别用cipher1,cipher2对明文msg进行加密，注意要把msg填充到16的倍数长，使得能够分块
-ciphertext1 = cipher1.encrypt(pad(msg,16))
-ciphertext2 = cipher2.encrypt(pad(msg,16))
-# 解密
-message1 = cipher1.decrypt(ciphertext1)
-message2 = cipher2.decrypt(ciphertext2)
-```
-
-</div>
-
----
-
 ## 非对称加密
 
 <div class="fragment" style="margin-top: 30px">
 
-对称加密的特点在于加密与解密需要的信息，算法都是高度对称的
-
-</div>
-
-<div class="fragment" style="margin-top: 30px">
-
-- 流密码加密解密都只需要相同密钥派生的密钥流，异或的过程是可逆的
-
-</div>
-
-
-<div class="fragment" style="margin-top: 30px">
-
-- 块密码加密解密所需要的密钥，初始向量(AES_CBC)也是对称的，实际上如果分析块密码的Feistel&SPN网络，能发现加密与解密的流程实际上也是一致的，只需要交换消息块和密钥块的位置即可
-- 但python中已经集成了常见块密码加密解密的函数，我们不必在这个上面消耗过多精力
-
-</div>
-
----
-
-## 非对称加密
-
-<div class="fragment" style="margin-top: 30px">
-
-而非对称加密的特点就是加密解密所需要的信息是不对称的，算法也往往存在差异
+非对称加密的特点是加密解密所需要的信息是不对称的，算法也往往存在差异
 
 </div>
 
@@ -645,9 +377,8 @@ message2 = cipher2.decrypt(ciphertext2)
 
 <div class="fragment" style="margin-top: 40px">
 
-本堂课的重心集中于前两者，即
+本堂课的重心集中于
 - 由大数分解构建的RSA加密体系
-- 由求解离散对数构建的DSA公钥签名体系
 
 </div>
 
@@ -718,9 +449,8 @@ print("p = ", p)
 print("q = ", q)
 print("n = ", p * q)
 ```
-考虑开根枚举的方法 大致$2^{64}$的运算复杂度，即使是最强大的CPU使用numpy库进行优化，也得跑1.45天，这显然没法接受，更何况实际选用的素数往往是1024位
+考虑开根枚举的方法 大致$2^{64}$的运算复杂度，即使是最强大的CPU使用numpy库进行优化，也最少得跑一个月，这显然没法接受，更何况实际选用的素数往往是1024位
 </div>
-
 
 ---
 
@@ -783,6 +513,13 @@ c^d\equiv m\mod n
 $$
 即可恢复明文
 </div>
+
+<div class="fragment" style="margin-top: 40px">
+
+拿一个简单的脚本演示一下
+
+</div>
+
 
 
 ---
@@ -945,11 +682,11 @@ c_2\equiv c_1^2 \mod n\\\\c_3\equiv c_1^3 \mod n
 $$
 即
 $$
-c_2-c_1^2\equiv 0 \mod n\\\\c_3-c_1^3\equiv 0 \mod n
+c_1^2-c_2\equiv 0 \mod n\\\\c_1^3-c_3\equiv 0 \mod n
 $$
 很可能就有
 $$
-n=gcd(c_2-c_1^2,c_3-c_1^3)
+n=gcd(c_1^2-c_2,c_1^3-c_3)
 $$
 </div>
 
@@ -975,6 +712,290 @@ $$
 <div class="fragment" style="margin-top: 40px">
 
 DSA就是ElGamal签名算法的一个常用变种
+
+</div>
+
+---
+
+## 对称加密
+
+<div class="fragment" style="margin-top: 20px">
+
+#### 流密码
+
+</div>
+
+<div class="fragment" style="margin-top: 20px">
+
+核心思想: 利用密钥$k$生成一个伪随机的数据流
+$$
+x_nx_{n-1}x_{n-2}\cdots x_2x_{1}x_{0}
+$$
+利用这个数据流来和我们的明文进行处理(譬如异或等)
+</div>
+
+
+
+<div class="fragment" style="margin-top: 40px">
+
+我们保证保密性的核心就是密钥流的随机性
+
+以异或处理为例子，假设我们的密文是
+$$
+c_nc_{n-1}c_{n-2}\cdots c_2c_{1}c_{0}
+$$
+
+</div>
+
+
+<div class="fragment" style="margin-top: 30px">
+
+对于任何明文流$m$，我们都能找到一个符合条件的密钥流，即
+$$
+x_i=c_i\oplus m_i
+$$
+</div>
+
+---
+
+## 对称加密
+
+<div class="fragment" style="margin-top: 30px">
+
+综上，流密码可以分成以下流程
+- 密钥派生: 使用伪随机生成器(PRG)由密钥生成长密钥流
+- 流式处理: 将密钥流和明文流进行处理(譬如异或)
+</div>
+
+<div class="fragment" style="margin-top: 30px">
+
+PRG具备如下特征
+- 长周期
+- 高线性复杂度, 不易被数学推导来预测(LCG)
+- 统计性能良好, 不易被统计预测信息
+- 足够的“混乱”、“扩散” , 是其"随机性"的体现
+</div>
+<div class="fragment" style="margin-top: 30px">
+
+流密码具备如下特征
+- 明文长度无明确要求
+- 加密解密的操作是对称的，关键在于恢复密钥流
+</div>
+
+---
+
+## 对称加密
+<div class="fragment" style="margin-top: 30px">
+
+#### 常见的PRG
+<ul style="line-height: 2.2; margin-top: 24px">
+<li style="margin-bottom: 14px">伪随机数生成器(PRNG)</li>
+<li style="margin-bottom: 14px">线性同余生成器(LCG)</li>
+<li>反馈移位寄存器(FSR)</li>
+</ul>
+</div>
+
+
+
+---
+
+## 对称加密
+<div class="fragment" style="margin-top: 30px">
+
+#### 伪随机数生成器(PRNG)
+- 这里的PRNG特指使用不安全的`random`库函数引入的随机数
+	- 这类random随机数的原理是梅森旋转(MT19937)
+	- 连续获取 624 * 32 = 19,968  字节的连续随机生成数据即可恢复随机数生成器状态
+	- 或者得到19937个连续的bit就能尝试恢复内部状态
+```python
+import random
+from randcrack import RandCrack
+ 
+rc = RandCrack()
+ 
+for i in range(624):
+    rc.submit(random.getrandbits(64))#修改为提交了624个64位数
+ 
+print(random.getrandbits(64))#利用random库获取一个64位的随机数
+print(rc.predict_getrandbits(64))#利用randcrack获取的随机数
+# https://github.com/guoql666/pyrandcracker
+```
+</div>
+
+---
+
+## 对称加密
+<div class="fragment" style="margin-top: 30px">
+
+#### 线性同余生成器(LCG)
+</div>
+<div class="fragment" style="margin-top: 40px">
+
+- 递推生成式大致如下
+$$
+X_{n+1}\equiv aX_{n} + c \mod n
+$$
+- 其具备很强的线性相关性，故容易被数学推导来破解，往往只需要几组连续的输出$X_i$即可
+
+</div>
+
+---
+
+
+## 对称加密
+
+#### 反馈移位寄存器(FSR)
+
+<FsrDemo />
+
+- 新生成的信息与当前的状态相关
+- 每次输出最右位，其余位右移，反馈位进入最左端
+
+---
+
+## 对称加密
+<div class="fragment" style="margin-top: 30px">
+
+#### 线反馈移位寄存器(LFSR)
+
+- $F$是线性函数，即
+$$
+a_n=\sum^{n-1}_{i=0}c_ia_i
+$$
+- 可以考虑使用Berlekamp-Massey算法来破解LFSR，需要连续$2n$组输出，即
+$$
+\begin{cases}
+a_{n}=\sum^{n-1}_{i=0}c_ia_i\\ a_{n+1}=\sum^{n-1}_{i=0}c_ia_{i+1}\\ \vdots \\ a_{2n-1}=\sum^{n-1}_{i=0}c_ia_{i+n-1}
+\end{cases}
+$$
+即可构造出一个满秩方程组求解$c_i$
+</div>
+
+---
+
+## 对称加密
+<div class="fragment" style="margin-top: 30px">
+
+#### 块密码
+
+</div>
+
+<div class="fragment" style="margin-top: 30px">
+
+核心思想: 对明文进行分块加密，不同块之间存在一定相关性
+
+同样的 密钥需要拓展到同等长度的块
+
+保密性在于密钥拓展到块的混淆以及块之间处理关系的复杂性
+
+具体体现在算法的**混淆**、**扩散**思想
+</div>
+
+---
+
+## 对称加密
+
+<div class="fragment" style="margin-top: 30px">
+
+类似前文，我们可以总结块密码的流程
+
+-  密钥派生
+-  信息分块
+-  块网络处理
+
+</div>
+<div class="fragment" style="margin-top: 30px">
+
+
+
+Crypto方向的CTF赛题中常见的块密码是AES,DES
+
+考点集中在对于AES不同加密方式 CBC EBC等的加密方式的理解与利用
+
+</div>
+
+---
+
+## 对称加密
+<div style="display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 24px; align-items: start; margin-top: 20px">
+
+<div>
+<img src="/crypto/ecb.svg" alt="ECB 模式：各明文块独立加密" class="crypto-diagram diagram-ecb" style="display: block; width: 100%; height: 210px; object-fit: contain; background: white; padding: 8px; box-sizing: border-box; margin: 0">
+
+<!-- 图片来源：https://commons.wikimedia.org/wiki/File:ECB_encryption.svg -->
+
+<div style="font-size: 18px; font-weight: 600; margin-top: 12px">ECB 模式</div>
+<p style="font-size: 16px; line-height: 1.6; margin-top: 8px">对明文分块，和密钥派生的密钥块按个进行异或，块与块之间独立。</p>
+</div>
+
+<div>
+<img src="/crypto/cbc.svg" alt="CBC 模式：初始向量与密文块链式反馈" class="crypto-diagram diagram-cbc" style="display: block; width: 100%; height: 210px; object-fit: contain; background: white; padding: 8px; box-sizing: border-box; margin: 0">
+
+<!-- 图片来源：https://commons.wikimedia.org/wiki/File:CBC_encryption.svg -->
+
+<div style="font-size: 18px; font-weight: 600; margin-top: 12px">CBC 模式</div>
+<p style="font-size: 16px; line-height: 1.6; margin-top: 8px">有初始向量 <code>iv</code>。对明文分块，初始向量 iv 先与第一个明文块异或，随后参与块加密过程，块与块之间的加密高度相关。</p>
+</div>
+
+</div>
+
+---
+
+## 对称加密
+#### AES · CBC 模式
+
+<CbcDemo />
+
+<p style="font-size: 15px; margin-top: 10px">C₁ = AES<sub>K</sub>(P₁ ⊕ IV)，C₂ = AES<sub>K</sub>(P₂ ⊕ C₁)。每组明文为 16 字节，第二组使用上一组密文参与异或。</p>
+
+
+---
+
+## 对称加密
+<div class="fragment" style="margin-top: 30px">
+
+AES代码示例
+```python
+from Crypto.Cipher import AES
+from random import Random
+key = b"KeyMustBe16Bytes"
+# 创建AES加密器实例，密钥为key，ECB模式无需初始向量
+cipher1 = AES.new(key, AES_MODE_ECB) 
+# 创建AES加密器实例，密钥为key，CBC模式需要初始向量iv
+iv = b"ivShouldBe16Byte"
+cipher2 = AES.new(key, AES_MODE_CBC, iv) 
+msg = b"This_is_a_message"
+# 分别用cipher1,cipher2对明文msg进行加密，注意要把msg填充到16的倍数长，使得能够分块
+ciphertext1 = cipher1.encrypt(pad(msg,16))
+ciphertext2 = cipher2.encrypt(pad(msg,16))
+# 解密
+message1 = cipher1.decrypt(ciphertext1)
+message2 = cipher2.decrypt(ciphertext2)
+```
+
+</div>
+
+---
+
+## 对称加密
+
+<div class="fragment" style="margin-top: 30px">
+
+对称加密的特点在于加密与解密需要的信息，算法都是高度对称的
+
+</div>
+
+<div class="fragment" style="margin-top: 30px">
+
+- 流密码加密解密都只需要相同密钥派生的密钥流，异或的过程是可逆的
+
+</div>
+
+
+<div class="fragment" style="margin-top: 30px">
+
+- 块密码加密解密所需要的密钥，初始向量(AES_CBC)也是对称的，实际上如果分析块密码的Feistel&SPN网络，能发现加密与解密的流程实际上也是一致的，只需要交换消息块和密钥块的位置即可
+- 但python中已经集成了常见块密码加密解密的函数，我们不必在这个上面消耗过多精力
 
 </div>
 
