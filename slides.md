@@ -33,7 +33,7 @@ revealOptions:
 ## 本堂课的内容
 <div class="fragment" style="margin-top: 40px">
 
-- 导论与古典密码:单表替换、多表替换及历史背景
+- 导论与古典密码:替换密码和一点(?历史背景
 
 </div>
 <div class="fragment" style="margin-top: 40px">
@@ -48,7 +48,12 @@ revealOptions:
 </div>
 <div class="fragment" style="margin-top: 40px">
 
-- 非对称加密与数字签名:RSA、ECC、DSA
+- 非对称加密:RSA
+
+</div>
+<div class="fragment" style="margin-top: 40px">
+
+- 环境安装:python, sagemath
 
 </div>
 
@@ -124,181 +129,34 @@ revealOptions:
 
 ## 凯撒密码
 
-<img src="/crypto/caesar.svg" alt="凯撒密码偏移 3 位的示意图" class="crypto-diagram diagram-caesar" style="display: block; width: auto; max-width: 100%; height: 180px; object-fit: contain; background: white; padding: 12px; box-sizing: border-box; margin: 16px 0">
+<p style="font-size: 18px; line-height: 1.5; margin: 14px 0">是一种单表替换加密技术，明文中的所有字母都在字母表上向后（或向前）按照一个固定数目进行偏移后被替换成密文。</p>
+
+<div style="display: flex; align-items: center; gap: 24px; margin: 12px 0">
+
+<img src="/crypto/caesar.svg" alt="凯撒密码偏移 3 位的示意图" class="crypto-diagram diagram-caesar" style="display: block; width: auto; max-width: 100%; height: 112px; object-fit: contain; background: white; padding: 8px; box-sizing: border-box; margin: 0">
 
 <!-- 图片来源：https://commons.wikimedia.org/wiki/File:Caesar3.svg -->
-<div class="fragment" style="margin-top: 40px">
 
-- 是一种单表替换加密技术，明文中的所有字母都在字母表上向后（或向前）按照一个固定数目进行偏移后被替换成密文
-	
-
-</div>
-
-<div class="fragment" style="margin-top: 40px">
-
-- 示例(偏移为3)
-```
-明文字母表：ABCDEFGHIJKLMNOPQRSTUVWXYZ
-密文字母表：DEFGHIJKLMNOPQRSTUVWXYZABC
-```
-
-</div>
-
----
-
-
-## 维吉尼亚密码
-
-<div class="vigenere-layout" style="display: grid; grid-template-columns: 310px minmax(0, 1fr); gap: 28px; align-items: start; margin-top: 20px">
-
-<div>
-
-<img src="/crypto/vigenere.svg" alt="维吉尼亚密码字母表" class="crypto-diagram diagram-vigenere" style="display: block; width: 310px; max-width: 100%; height: 310px; object-fit: contain; background: white; padding: 8px; box-sizing: border-box; margin: 0">
-
-<!-- 图片来源：https://commons.wikimedia.org/wiki/File:Vigenère_square.svg -->
-
-</div>
-
-<div class="vigenere-explanation" style="font-size: 18px; line-height: 1.5">
-
-<div class="fragment" style="margin-top: 0">
-
-- 是使用一系列凯撒密码组成密码字母表的加密算法，属于多表替换密码的一种简单形式	
-
-</div>
-<div class="fragment" style="margin-top: 18px">
-
-- 在一个凯撒密码中，字母表中的每一字母都会作一定的偏移，例如偏移量为3时，A就转换为了D、B转换为了E……而维吉尼亚密码则是由一些偏移量不同的凯撒密码组成。
-- 为了生成密码，需要使用表格法。这一表格包括了26行字母表，每一行都由前一行向左偏移一位得到。具体使用哪一行字母表进行编译是基于密钥进行的，在过程中会不断地变换
-
+<div style="font-size: 16px; line-height: 1.7">
+<div style="margin-bottom: 6px">示例（偏移为 3）</div>
+<div style="font-family: monospace; white-space: nowrap">明文字母表：ABCDEFGHIJKLMNOPQRSTUVWXYZ</div>
+<div style="font-family: monospace; white-space: nowrap; color: #fcd34d">密文字母表：DEFGHIJKLMNOPQRSTUVWXYZABC</div>
 </div>
 
 </div>
 
-</div>
-
----
-
-## 示例
-<div class="fragment" style="margin-top: 10px">
-
-- 假设明文为
-```
-ATTACKATDAWN
-```
-
-</div>
-<div class="fragment" style="margin-top: 10px">
-
-- 选择某一关键词并重复而得到密钥，如关键词为 `LEMON` 时，密钥为
-```
-LEMONLEMONLE
-```
-
-</div>
-
-<div class="fragment" style="margin-top: 40px">
-
-- 对于明文的第一个字母A，对应密钥的第一个字母L，于是使用表格中L行字母表进行加密，得到密文第一个字母L。类似地，明文第二个字母为T，在表格中使用对应的E行进行加密，得到密文第二个字母X。以此类推，可以得到
-
-```text
-明文：ATTACKATDAWN
-密钥：LEMONLEMONLE
-密文：LXFOPVEFRNHR
-```
-
-</div>
-
----
-
-## 示例
-
-<div class="fragment" style="margin-top: 10px">
-
-- 解密的过程则与加密相反。例如：根据密钥第一个字母L所对应的L行字母表，发现密文第一个字母L位于A列，因而明文第一个字母为A。密钥第二个字母E对应E行字母表，而密文第二个字母X位于此行T列，因而明文第二个字母为T。以此类推便可得到明文
-
-</div>
-
-<div class="fragment" style="margin-top: 40px">
-
-可以写成如下同余式(C,P,K分别代表密文,明文,密钥)
-- 加密
-$$
-C_i\equiv P_i+K_i\mod26
-$$
-- 解密
-$$
-P_i\equiv C_i-K_i\mod26
-$$
-
-</div>
-
----
-
-## 破译
-<div class="fragment" style="margin-top: 10px">
-
-- 所有的替换密码的破译都是以**字母频率**为基础的，比如在英语中字频最高的字母是 `e` ，因而单表替换后出现频率最高的字母我们可以认为是`e` 加密后的结果
-
-</div>
-
-
-<div class="fragment" style="margin-top: 10px">
-
-- 但是维吉尼亚密码的破译不能直接进行分析，因为字母的偏移量是随着密钥动态变化的，但是密钥的循环使用也使得我们能进行弱化版的词频分析
-
-</div>
-
-
-<div class="fragment" style="margin-top: 20px">
-
-```text
-明文：ATTACKATDAWN
-密钥：LEMONLEMONLE
-密文：LXFOPVEFRNHR
-```
-这里我们第1 6 11的明文使用的偏移量都是`L` 所以说我们可以先猜测密钥的长度(大致不会超过30字符)，随后以密钥长度为步长划分出同一偏移量的密文，来进行词频分析
-</div>
-
-<div class="fragment" style="margin-top: 20px">
-
-附上两个分析词频比较常用的工具网站
-
-[Vigenere Solver | guballa.de](https://www.guballa.de/vigenere-solver)
-
-[quipqiup - cryptoquip and cryptogram solver](https://www.quipqiup.com/)
-
-</div>
+<CaesarDemo />
 
 ---
 
 ## 移项式密码
-<div class="fragment" style="margin-top: 20px">
 
-- 加密变换使得信息元素只有位置变化而内容不变
-
+<div style="font-size: 18px; line-height: 1.5; margin-top: 16px">
+<p style="margin: 0 0 8px">加密变换使得信息元素只有位置变化而内容不变。</p>
+<p style="margin: 0">栅栏密码：把明文按列填入 k 行，再按行重新拼接；k 即为加密的密钥。</p>
 </div>
 
-<div class="fragment" style="margin-top: 20px">
-
-- 栅栏密码
-	- 把明文分割成k行，然后重新拼接，这里k即为加密的密钥
-
-</div>
-
-
-
-<div class="fragment" style="margin-top: 20px">
-
-- 例如`k=3 P = crypto basic`
-	- 加密过程如下，首先按明文顺序分割成3行
-```
-(1) cp s
-(2) rtbi
-(3) yoac
-```
-重新按行拼接得到密文C= cp srtbiyoac
-</div>
+<TranspositionDemo />
 
 
 ---
@@ -628,12 +486,8 @@ $$
 
 <FsrDemo />
 
-- 新生成的信息与当前的状态相关；上方以异或反馈的 LFSR 为例
-- 每拍输出最右位，其余位右移，反馈位进入最左端
-
-$
-a_n=F(a_0,a_1,a_2,\cdots,a_{n-1})
-$
+- 新生成的信息与当前的状态相关
+- 每次输出最右位，其余位右移，反馈位进入最左端
 
 ---
 
@@ -714,17 +568,11 @@ Crypto方向的CTF赛题中常见的块密码是AES,DES
 ---
 
 ## 对称加密
-<div class="fragment" style="margin-top: 30px">
+#### AES · CBC 模式
 
-<img src="/crypto/cbc.svg" alt="CBC 模式：初始向量与密文块链式反馈" class="crypto-diagram diagram-cbc" style="display: block; width: auto; max-width: 100%; height: 230px; object-fit: contain; background: white; padding: 12px; box-sizing: border-box; margin: 16px 0">
+<CbcDemo />
 
-<!-- 图片来源：https://commons.wikimedia.org/wiki/File:CBC_encryption.svg -->
-
-- CBC模式 
-
-有初始向量`iv` 
-对明文分块，初始向量iv先与第一个明文块异或，随后参与块加密过程，块与块之间的加密高度相关
-</div>
+<p style="font-size: 15px; margin-top: 10px">C₁ = AES<sub>K</sub>(P₁ ⊕ IV)，C₂ = AES<sub>K</sub>(P₂ ⊕ C₁)。每组明文为 16 字节，第二组使用上一组密文参与异或。</p>
 
 
 ---
