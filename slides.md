@@ -466,7 +466,7 @@ print("n = ", p * q)
 
 #### 加密
 
-Alice选取两个大素数$p$ $q$ ,计算它们的积$n=p\times q$
+Bob选取两个大素数$p$ $q$ ,计算它们的积$n=p\times q$
 
 选取一个数$e$，一般保证它是一个素数，常用65537($2^{16}+1$)
 
@@ -479,6 +479,8 @@ Alice选取两个大素数$p$ $q$ ,计算它们的积$n=p\times q$
 $$
 ed\equiv1 \mod \phi
 $$
+
+然后公开公钥:$(e,n)$ 自己保留私钥:$(d,n)$
 </div>
 
 ---
@@ -487,7 +489,8 @@ $$
 
 <div class="fragment" style="margin-top: 40px">
 
-选取要加密的信息$m$，保证$m\le n$计算
+Alice想要加密并发送给Bob信息$m$，保证$m\le n$，先找到Bob公开的公钥，
+计算
 $$
 c\equiv m^e \mod n
 $$
@@ -495,9 +498,7 @@ $$
 </div>
 <div class="fragment" style="margin-top: 40px">
 
-加密完成，公钥为$(e,n)$ 私钥为$(d,n)$,密文为$c$
-
-Alice只需提前将私钥给Bob保密即可，公钥与密文可以公开给网络
+加密完成，Alice把密文公开给网络/或者发送给Bob
 </div>
 
 ---
@@ -557,7 +558,7 @@ $$
 #### 证明
 
 由欧拉定理，
-因为$n$是两个大素数的积，故$gcd(m,n)=1$,那么
+因为$n$是两个很大素数的积，故很可能有$gcd(m,n)=1$,那么
 $$
 m^{\phi}\equiv1\mod n
 $$
@@ -568,7 +569,7 @@ $$
 
 所以
 $$
-m^d\equiv m\times (m^{\phi})^{k} \equiv m\mod n
+m\times (m^{\phi})^{k} \equiv m\times 1^k\equiv m\mod n
 $$
 证毕
 </div>
@@ -654,7 +655,7 @@ CTF赛题中与RSA相关的漏洞往往体现在以下三个方面
 
 常见的有如下类别
 - $e$过小
-	- 使得$c$与$n$过于接近，对$c$直接开$e$次方根即恢复$m$
+	- $m^e$仍然小于$n$或小于$2n$，对$c$直接开$e$次方根即恢复$m$
 - 选择明文攻击/Oracle预测机
 	- 当我们能自己选择明文$m$进行加密，我们可以考虑如下破解思路
 $$
