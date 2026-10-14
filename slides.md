@@ -806,7 +806,7 @@ PRG具备如下特征
 #### 伪随机数生成器(PRNG)
 - 这里的PRNG特指使用不安全的`random`库函数引入的随机数
 	- 这类random随机数的原理是梅森旋转(MT19937)
-	- 连续获取 624 * 32 = 19,968  字节的连续随机生成数据即可恢复随机数生成器状态
+	- 连续获取 624 * 32 = 19,968  比特的连续随机生成数据即可恢复随机数生成器状态
 	- 或者得到19937个连续的bit就能尝试恢复内部状态
 ```python
 import random
@@ -909,9 +909,11 @@ $$
 
 
 
-Crypto方向的CTF赛题中常见的块密码是AES,DES
+Crypto方向的CTF赛题中常见的块密码是AES,DES,也会有一些Feistel网络的题目
 
 考点集中在对于AES不同加密方式 CBC EBC等的加密方式的理解与利用
+
+Feistel结构则更倾向于逆变换的构造
 
 </div>
 
@@ -979,6 +981,15 @@ message2 = cipher2.decrypt(ciphertext2)
 ---
 
 ## 对称加密
+#### Feistel 网络
+
+<FeistelDemo />
+
+<p style="font-size: 14px; line-height: 1.5; margin-top: 8px">Lᵢ₊₁ = Rᵢ，Rᵢ₊₁ = Lᵢ ⊕ F(Rᵢ, Kᵢ₊₁)。教学示例采用 16 位分组、4 轮，轮函数 F(R,K) = ROL₁(R ⊕ K)，ROL₁ 表示循环左移一位。</p>
+
+---
+
+## 对称加密
 
 <div class="fragment" style="margin-top: 30px">
 
@@ -995,7 +1006,7 @@ message2 = cipher2.decrypt(ciphertext2)
 
 <div class="fragment" style="margin-top: 30px">
 
-- 块密码加密解密所需要的密钥，初始向量(AES_CBC)也是对称的，实际上如果分析块密码的Feistel&SPN网络，能发现加密与解密的流程实际上也是一致的，只需要交换消息块和密钥块的位置即可
+- 块密码加密解密所需要的密钥，初始向量(AES_CBC)也是对称的，实际上如果分析块密码的Feistel&SPN网络，能发现加密与解密的流程实际上也是一致的，只是明文和密文交换位置，然后原来的变换$F$变成逆变换$F^{-1}$
 - 但python中已经集成了常见块密码加密解密的函数，我们不必在这个上面消耗过多精力
 
 </div>

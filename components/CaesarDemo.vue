@@ -5,12 +5,12 @@ const SLOTS = 12
 const alphabet = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ'
 const angle = 360 / 26
 
-const draftBoxes = ref<string[]>([...'ATTACKATDAWN'])
+const draftBoxes = ref<string[]>([...'ITS MY DAWN  '])
 const boxInputs = ref<(HTMLInputElement | null)[]>([])
-const plaintext = ref('ATTACKATDAWN')
+const plaintext = ref('ITS MY DAWN  ')
 const letterCount = computed(() => draftBoxes.value.filter(letter => letter !== ' ').length)
 const turns = ref(0)
-const spins = ref<number[]>([...'ATTACKATDAWN'].map(letter => alphabet.indexOf(letter)))
+const spins = ref<number[]>([...'ITS MY DAWN  '].map(letter => alphabet.indexOf(letter)))
 const key = computed(() => ((turns.value % 26) + 26) % 26)
 const keyDraft = ref<number | string>(0)
 const editingKey = ref(false)

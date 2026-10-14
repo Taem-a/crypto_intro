@@ -1,9 +1,18 @@
 <script setup lang="ts">
-import { computed, onBeforeUnmount, ref } from 'vue'
+import { computed, onBeforeUnmount, ref, watch } from 'vue'
 import { traceAes128, type AesFrame } from './aes128'
 
-const plaintexts = ['ATTACK AT DAWN!!', 'RETREAT AT DUSK!']
-const blocks = plaintexts.map(text => new TextEncoder().encode(text))
+const plaintexts = ref(['ATTACK AT DAWN!!', 'RETREAT AT DUSK!'])
+const rawBlocks = computed(() => plaintexts.value.map(text => new TextEncoder().encode(text)))
+const valid = computed(() => rawBlocks.value.every(block => block.length <= 16))
+const blocks = computed(() => rawBlocks.value.map(bytes => {
+  if (bytes.length > 16) return null
+  const padded = new Uint8Array(16)
+  padded.set(bytes)
+  // Pad short groups with N copies of N, using AES's 16-byte block size.
+  if (bytes.length < 16) padded.fill(16 - bytes.length, bytes.length)
+  return padded
+}))
 const key = ref<Uint8Array | null>(null)
 const iv = ref<Uint8Array | null>(null)
 const inputs = ref<(number[] | null)[]>([null, null])
@@ -20,6 +29,13 @@ let traces: AesFrame[][] = [[], []]
 const hex = (values: ArrayLike<number> | null) => values ? Array.from(values).map(byte => byte.toString(16).padStart(2, '0').toUpperCase()).join(' ') : '—'
 const randomBytes = () => globalThis.crypto.getRandomValues(new Uint8Array(16))
 const matrix = (state: number[]) => Array.from({ length: 16 }, (_, index) => state[(index % 4) * 4 + Math.floor(index / 4)])
+function paddingLabel(block: number) {
+  const length = rawBlocks.value[block].length
+  if (length > 16) return `超过 16 字节，请缩短输入（当前 ${length} 字节）`
+  if (length === 16) return '16 字节完整分组'
+  const count = 16 - length
+  return `PKCS#7 填充：${count} 个 0x${hex([count])}`
+}
 function stageLabel(frame: AesFrame | null) {
   if (!frame) return '等待进入 SP 网络'
   if (frame.stage === 'substitute') return `第 ${frame.round} 轮 · SubBytes 混淆`
@@ -29,7 +45,7 @@ function stageLabel(frame: AesFrame | null) {
 
 function mix(block: number) {
   const feedback = block === 0 ? iv.value! : ciphertexts.value[0]!
-  const mixed = [...blocks[block]].map((byte, index) => byte ^ feedback[index])
+  const mixed = [...blocks.value[block]!].map((byte, index) => byte ^ feedback[index])
   inputs.value[block] = mixed
   traces[block] = traceAes128(new Uint8Array(mixed), key.value!)
   activeBlock.value = block
@@ -53,7 +69,7 @@ function finish(block: number) {
 }
 
 function next() {
-  if (busy.value || step.value === 9) return
+  if (busy.value || step.value === 9 || !valid.value) return
   switch (step.value) {
     case 0: key.value = randomBytes(); break
     case 1: iv.value = randomBytes(); mix(0); break
@@ -80,21 +96,26 @@ function reset() {
   busy.value = false
   activeBlock.value = -1
 }
+watch(plaintexts, reset, { deep: true, flush: 'sync' })
 onBeforeUnmount(() => clearTimeout(timer))
 </script>
 
 <template>
   <div class="cbc-demo" @click.stop @dblclick.stop @keydown.stop>
     <div class="cbc-toolbar">
-      <button class="cbc-next" :disabled="busy || step === 9" @click="next">{{ action }}</button>
+      <button class="cbc-next" :disabled="busy || step === 9 || !valid" @click="next">{{ action }}</button>
       <span>步骤 {{ step }} / 9</span>
       <button class="cbc-reset" @click="reset">重置</button>
     </div>
     <div class="cbc-key">AES-128 密钥 K：<code>{{ hex(key) }}</code></div>
     <div class="cbc-blocks">
       <section v-for="(plaintext, block) in plaintexts" :key="block" class="cbc-block" :class="{ 'cbc-active': activeBlock === block, 'cbc-complete': ciphertexts[block] }">
-        <div class="cbc-block-title">明文 P{{ block + 1 }} · 16 字节 <strong>{{ plaintext }}</strong></div>
-        <code class="cbc-bytes">{{ hex(blocks[block]) }}</code>
+        <div class="cbc-block-title">
+          <label :for="`cbc-plaintext-${block}`">明文 P{{ block + 1 }} · {{ rawBlocks[block].length }}/16 B</label>
+          <input :id="`cbc-plaintext-${block}`" v-model="plaintexts[block]" type="text" autocomplete="off" spellcheck="false" placeholder="输入明文" :aria-invalid="rawBlocks[block].length > 16" :aria-describedby="`cbc-padding-${block}`">
+        </div>
+        <div :id="`cbc-padding-${block}`" class="cbc-padding" :class="{ 'cbc-input-error': rawBlocks[block].length > 16 }">{{ paddingLabel(block) }}</div>
+        <code class="cbc-bytes"><template v-if="blocks[block]"><span v-for="(byte, index) in blocks[block]" :key="index" :class="{ 'cbc-padding-byte': index >= rawBlocks[block].length }">{{ hex([byte]) }}{{ index === 15 ? '' : ' ' }}</span></template><template v-else>—</template></code>
         <div class="cbc-mix" :class="{ 'cbc-revealed': inputs[block] }">
           <div><span>{{ block === 0 ? '⊕ 随机 IV' : '⊕ 密文 C1' }}</span><code>{{ hex(block === 0 ? iv : ciphertexts[0]) }}</code></div>
           <div><span>＝ AES 输入</span><code>{{ hex(inputs[block]) }}</code></div>
@@ -122,7 +143,7 @@ onBeforeUnmount(() => clearTimeout(timer))
 .cbc-toolbar button { padding: 4px 12px; border: 1px solid #64748b; border-radius: 6px; font: inherit; color: inherit; background: #172033; cursor: pointer; }
 .cbc-toolbar .cbc-next { border-color: #38bdf8; background: #0c4a6e; color: #7dd3fc; min-width: 194px; }
 .cbc-toolbar button:disabled { cursor: default; opacity: .55; }
-.cbc-toolbar button:focus-visible { outline: 2px solid #38bdf8; outline-offset: 3px; }
+.cbc-toolbar button:focus-visible, .cbc-block-title input:focus-visible { outline: 2px solid #38bdf8; outline-offset: 3px; }
 .cbc-toolbar > span { color: #94a3b8; font-size: 12px; }
 .cbc-reset { margin-left: auto; }
 .cbc-key { margin: 7px 0; color: #fbbf24; font-size: 12px; }
@@ -131,8 +152,13 @@ onBeforeUnmount(() => clearTimeout(timer))
 .cbc-block { min-width: 0; padding: 10px 12px; border: 1px solid #475569; border-radius: 9px; background: #172033; transition: border-color .2s; }
 .cbc-active { border-color: #38bdf8; }
 .cbc-complete { border-color: #34d399; }
-.cbc-block-title { display: flex; justify-content: space-between; gap: 6px; color: #94a3b8; font-size: 12px; }
-.cbc-block-title strong { color: #e2e8f0; font: 14px/18px monospace; }
+.cbc-block-title { display: flex; align-items: center; gap: 8px; color: #94a3b8; font-size: 12px; }
+.cbc-block-title label { flex: 0 0 auto; white-space: nowrap; }
+.cbc-block-title input { flex: 1; min-width: 0; width: 0; padding: 2px 6px; border: 1px solid #64748b; border-radius: 4px; background: #0b1220; color: #e2e8f0; font: 14px/18px monospace; }
+.cbc-block-title input[aria-invalid="true"] { border-color: #f87171; }
+.cbc-padding { margin-top: 2px; color: #94a3b8; font: 11px/16px monospace; }
+.cbc-padding-byte { color: #fbbf24; }
+.cbc-input-error { color: #fca5a5; }
 .cbc-bytes { display: block; margin-top: 3px; }
 .cbc-mix { margin-top: 7px; color: #64748b; }
 .cbc-mix > div { display: flex; align-items: center; gap: 6px; }
